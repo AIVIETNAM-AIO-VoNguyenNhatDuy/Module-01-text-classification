@@ -40,9 +40,7 @@ Recommended subset for faster iteration:
 - `rec.sport.hockey`
 - `comp.graphics`
 - `talk.politics.misc`
-
-The original project brief is stored at `docs/Research-Module-1.pdf`.
-
+- 
 ## Methodology
 
 ```text
