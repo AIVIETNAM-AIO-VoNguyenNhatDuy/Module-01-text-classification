@@ -1,4 +1,4 @@
-# Module 01 - Text Classification
+# Module 01 Project - Impact of Stopword Removal on Text Classification
 
 Research project for the Module 1 text classification topic.
 
