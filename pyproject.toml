@@ -4,6 +4,14 @@ version = "0.1.0"
 description = "Research project on stopword removal impact in text classification."
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.10.9",
+    "nltk>=3.9.4",
+    "numpy>=2.2.6",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -12,3 +20,8 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.5.8",
+]
