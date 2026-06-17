@@ -54,3 +54,17 @@ def load_20newsgroups_raw(categories: list[str] | None = None):
     })
     
     return train_df, test_df
+
+def save_csv(df, file_path):
+    df.to_csv(file_path, index=False)
+
+def load_20newsgroups_processed():
+    train_path = os.path.join("../data/processed/", "20newsgroups_train.csv")
+    test_path = os.path.join("../data/processed/", "20newsgroups_test.csv")
+
+    train_df = pd.read_csv(train_path)
+    test_df = pd.read_csv(test_path)
+    
+    return train_df, test_df
+
+    
