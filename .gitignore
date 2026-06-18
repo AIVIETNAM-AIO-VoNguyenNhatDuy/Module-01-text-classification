@@ -19,7 +19,6 @@ env/
 # Data and generated artifacts
 data/raw/*
 data/interim/*
-data/processed/*
 reports/results/*
 reports/figures/*
 images/*
