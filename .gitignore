@@ -31,6 +31,14 @@ models/*
 !images/.gitkeep
 !models/.gitkeep
 
+# MLflow
+mlruns/
+mlartifacts/
+
+# Hydra
+outputs/
+multirun/
+
 # Jupyter
 .ipynb_checkpoints/
 
