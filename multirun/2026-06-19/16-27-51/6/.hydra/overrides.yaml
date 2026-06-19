@@ -1,0 +1,2 @@
+- model=logistic_regression
+- stopword_ratio=0.2

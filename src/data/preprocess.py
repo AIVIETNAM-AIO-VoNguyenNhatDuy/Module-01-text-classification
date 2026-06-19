@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import re
 import pandas as pd
 import numpy as np
@@ -10,20 +9,13 @@ from sklearn.datasets import fetch_20newsgroups
 
 def clean_text(df):
     df["clean_text"] = df["text"].astype(str)
-
     df["clean_text"] = df["clean_text"].apply(lambda x: re.sub(r"\S+@\S+", " ", x))
-
     df["clean_text"] = df["clean_text"].apply(lambda x: re.sub(r"(?m)^--.*$", " ", x))
-
     df["clean_text"] = df["clean_text"].str.lower()
-
     df["clean_text"] = df["clean_text"].apply(lambda x: re.sub(r"[^a-z\s]", " ", x))
-
     df["clean_text"] = df["clean_text"].apply(lambda x: re.sub(r"\s+", " ", x).strip())
-
     df["clean_text"] = df["clean_text"].replace("", np.nan)
     df = df.dropna(subset=["clean_text"])
-
     df = df[df["clean_text"].str.split().str.len() >= 5]
     df = df.reset_index(drop=True)
 
@@ -66,10 +58,9 @@ def save_csv(df, file_path):
 
 
 def load_20newsgroups_processed():
-    train_path = os.path.join("../data/processed/", "20newsgroups_train.csv")
-    test_path = os.path.join("../data/processed/", "20newsgroups_test.csv")
+    from configs.config import DATA_DIR
 
-    train_df = pd.read_csv(train_path)
-    test_df = pd.read_csv(test_path)
+    train_df = pd.read_csv(DATA_DIR / "processed" / "20newsgroups_train.csv")
+    test_df = pd.read_csv(DATA_DIR / "processed" / "20newsgroups_test.csv")
 
     return train_df, test_df

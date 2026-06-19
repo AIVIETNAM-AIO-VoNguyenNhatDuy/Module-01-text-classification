@@ -13,7 +13,7 @@ from sklearn.metrics import (
 )
 
 from configs.config import IMAGES_DIR
-from data.preprocess import load_20newsgroups_data
+from data.preprocess import load_20newsgroups_processed
 
 
 def evaluate_predictions(
@@ -69,14 +69,19 @@ def evaluate_saved_model(
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    _, test_data = load_20newsgroups_data(categories=categories)
+    _, test_df = load_20newsgroups_processed()
+    if categories:
+        test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
+    target_names = sorted(test_df["target_name"].unique().tolist())
+    label_to_idx = {name: i for i, name in enumerate(target_names)}
+
     pipeline = joblib.load(model_path)
-    predictions = pipeline.predict(test_data.data)
+    predictions = pipeline.predict(test_df["clean_text"])
 
     result = evaluate_predictions(
-        y_true=test_data.target,
+        y_true=test_df["target_name"].map(label_to_idx),
         y_pred=predictions,
-        target_names=test_data.target_names,
+        target_names=target_names,
         run_id="best_model_evaluation",
         output_dir=output_dir,
     )
