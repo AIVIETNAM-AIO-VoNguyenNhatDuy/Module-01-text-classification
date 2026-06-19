@@ -84,12 +84,14 @@ def run_experiment(cfg: DictConfig) -> None:
     categories = list(cfg.categories)
     output_dir = Path(cfg.paths.results_dir)
     model_path = Path(cfg.paths.model_path)
+    data_dir = Path(cfg.paths.data_dir)
+    images_dir = Path(cfg.paths.images_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Load data
-    train_df, test_df = load_20newsgroups_processed()
+    train_df, test_df = load_20newsgroups_processed(data_dir)
     if categories:
         train_df = train_df[train_df["target_name"].isin(categories)].reset_index(drop=True)
         test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
@@ -109,6 +111,7 @@ def run_experiment(cfg: DictConfig) -> None:
         target_names=target_names,
         run_id=run_name,
         output_dir=output_dir,
+        images_dir=images_dir,
     )
 
     # Log to MLflow

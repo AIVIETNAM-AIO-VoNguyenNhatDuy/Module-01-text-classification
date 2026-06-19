@@ -93,19 +93,17 @@ def save_csv(df: pd.DataFrame, file_path: Path | str) -> None:
     df.to_csv(file_path, index=False)
 
 
-def load_20newsgroups_processed() -> tuple[pd.DataFrame, pd.DataFrame]:
+def load_20newsgroups_processed(data_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Load the preprocessed 20 Newsgroups CSVs from disk.
 
-    Reads from `data/processed/` relative to the project root as defined
-    in `configs.config.DATA_DIR`.
+    Args:
+        data_dir: Path to the data directory containing the `processed/` subdirectory.
 
     Returns:
         A tuple (train_df, test_df) with columns `text`, `target`,
         `target_name`, and `clean_text`.
     """
-    from configs.config import DATA_DIR
-
-    train_df = pd.read_csv(DATA_DIR / "processed" / "20newsgroups_train.csv")
-    test_df = pd.read_csv(DATA_DIR / "processed" / "20newsgroups_test.csv")
+    train_df = pd.read_csv(data_dir / "processed" / "20newsgroups_train.csv")
+    test_df = pd.read_csv(data_dir / "processed" / "20newsgroups_test.csv")
 
     return train_df, test_df
