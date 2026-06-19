@@ -20,6 +20,22 @@ def train_pipeline(
     model_path: Path,
     output_dir: Path,
 ) -> pd.DataFrame:
+    """Train all model/ratio combinations, save the best pipeline, and return metrics.
+
+    Iterates over every (stopword_ratio, model_name) pair, fits a TF-IDF +
+    classifier pipeline, evaluates on the test set, and persists the pipeline
+    with the highest weighted F1.
+
+    Args:
+        categories: 20 Newsgroups category names to load for train/test.
+        stopword_ratios: Fractions of stopwords to remove, e.g. [0.0, 0.5, 1.0].
+        model_path: Destination path to save the best fitted pipeline.
+        output_dir: Directory where per-run reports and confusion matrices are written.
+
+    Returns:
+        A DataFrame with one row per (ratio, model) run containing run_id,
+        accuracy, macro_f1, weighted_f1, vectorizer, model, and stopword_ratio.
+    """
     train_data, test_data = load_20newsgroups_data(categories=categories)
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path.parent.mkdir(parents=True, exist_ok=True)

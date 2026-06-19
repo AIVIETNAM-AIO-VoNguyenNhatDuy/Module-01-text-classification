@@ -24,6 +24,19 @@ def evaluate_predictions(
     run_id: str,
     output_dir: Path,
 ) -> dict[str, float | str]:
+    """Compute metrics, save reports and confusion matrix, and return a result dict.
+
+    Args:
+        y_true: Ground-truth integer labels.
+        y_pred: Predicted integer labels.
+        target_names: Ordered list of class names corresponding to label indices.
+        run_id: Identifier used to name output files.
+        output_dir: Directory where the classification report and matrix CSV are saved.
+
+    Returns:
+        A dict with keys: run_id, accuracy, macro_f1, weighted_f1,
+        report_path, confusion_matrix_path, confusion_matrix_image.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -66,6 +79,20 @@ def evaluate_saved_model(
     model_path: Path,
     output_dir: Path,
 ) -> dict[str, float | str]:
+    """Load a saved pipeline and evaluate it on the processed test set.
+
+    Args:
+        categories: Category names used to filter the test set.
+        model_path: Path to the saved sklearn pipeline (.pkl).
+        output_dir: Directory where evaluation artifacts are written.
+
+    Returns:
+        A dict with keys: run_id, accuracy, macro_f1, weighted_f1,
+        report_path, confusion_matrix_path, confusion_matrix_image.
+
+    Raises:
+        FileNotFoundError: If model_path does not exist.
+    """
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
