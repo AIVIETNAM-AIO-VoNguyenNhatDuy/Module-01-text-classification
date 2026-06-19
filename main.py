@@ -10,7 +10,9 @@ from pipelines.pipeline import train_pipeline
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Stopword removal text classification pipeline.")
-    parser.add_argument("--train", action="store_true", help="Train models and save the best pipeline.")
+    parser.add_argument(
+        "--train", action="store_true", help="Train models and save the best pipeline."
+    )
     parser.add_argument("--evaluate", action="store_true", help="Evaluate the saved pipeline.")
     parser.add_argument(
         "--categories",
@@ -26,7 +28,9 @@ def parse_args() -> argparse.Namespace:
         help="Stopword removal ratios to benchmark.",
     )
     parser.add_argument("--model-path", default=str(MODEL_PATH), help="Path to save/load model.")
-    parser.add_argument("--output-dir", default=str(RESULTS_DIR), help="Directory for result files.")
+    parser.add_argument(
+        "--output-dir", default=str(RESULTS_DIR), help="Directory for result files."
+    )
     return parser.parse_args()
 
 
