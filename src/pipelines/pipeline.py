@@ -6,7 +6,7 @@ import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from data.preprocess import load_20newsgroups_data
+from data.preprocess import load_20newsgroups_processed
 from evaluation.metrics import evaluate_predictions
 from features.build_features import build_vectorizer, stopwords_for_ratio
 from models.model import build_model
@@ -39,7 +39,11 @@ def train_pipeline(
         A DataFrame with one row per (ratio, model) run containing run_id,
         accuracy, macro_f1, weighted_f1, vectorizer, model, and stopword_ratio.
     """
-    train_data, test_data = load_20newsgroups_data(categories=categories)
+    train_df, test_df = load_20newsgroups_processed(Path("data"))
+    train_df = train_df[train_df["target_name"].isin(categories)].reset_index(drop=True)
+    test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
+    target_names = train_df.sort_values("target")["target_name"].drop_duplicates().tolist()
+
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -53,16 +57,16 @@ def train_pipeline(
             pipeline = Pipeline(
                 steps=[
                     ("vectorizer", build_vectorizer("tfidf", stopwords_for_ratio(ratio))),
-                    ("model", build_model(model_name)),
+                    ("model", build_model(model_name, n_jobs=1)),
                 ]
             )
-            pipeline.fit(train_data.data, train_data.target)
-            predictions = pipeline.predict(test_data.data)
+            pipeline.fit(train_df["clean_text"], train_df["target"])
+            predictions = pipeline.predict(test_df["clean_text"])
 
             result = evaluate_predictions(
-                y_true=test_data.target,
+                y_true=test_df["target"],
                 y_pred=predictions,
-                target_names=test_data.target_names,
+                target_names=target_names,
                 run_id=run_id,
                 output_dir=output_dir,
                 images_dir=images_dir,
