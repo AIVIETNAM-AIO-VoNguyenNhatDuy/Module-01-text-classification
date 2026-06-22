@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
 
 
-def build_model(name: str):
+def build_model(name: str) -> BaseEstimator:
+    """Instantiate a classifier by name.
+
+    Args:
+        name: One of "naive_bayes", "logistic_regression", or "random_forest".
+
+    Returns:
+        An unfitted sklearn classifier instance.
+
+    Raises:
+        ValueError: If name is not a supported model.
+    """
     if name == "naive_bayes":
         return MultinomialNB()
     if name == "logistic_regression":

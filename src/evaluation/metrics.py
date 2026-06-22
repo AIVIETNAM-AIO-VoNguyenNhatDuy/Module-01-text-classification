@@ -12,8 +12,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from configs.config import IMAGES_DIR
-from data.preprocess import load_20newsgroups_data
+from data.preprocess import load_20newsgroups_processed
 
 
 def evaluate_predictions(
@@ -23,9 +22,24 @@ def evaluate_predictions(
     target_names: list[str],
     run_id: str,
     output_dir: Path,
+    images_dir: Path,
 ) -> dict[str, float | str]:
+    """Compute metrics, save reports and confusion matrix, and return a result dict.
+
+    Args:
+        y_true: Ground-truth integer labels.
+        y_pred: Predicted integer labels.
+        target_names: Ordered list of class names corresponding to label indices.
+        run_id: Identifier used to name output files.
+        output_dir: Directory where the classification report and matrix CSV are saved.
+        images_dir: Directory where confusion matrix images are saved.
+
+    Returns:
+        A dict with keys: run_id, accuracy, macro_f1, weighted_f1,
+        report_path, confusion_matrix_path, confusion_matrix_image.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
-    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+    images_dir.mkdir(parents=True, exist_ok=True)
 
     report = classification_report(
         y_true,
@@ -38,7 +52,7 @@ def evaluate_predictions(
 
     report_path = output_dir / f"{run_id}_classification_report.json"
     matrix_path = output_dir / f"{run_id}_confusion_matrix.csv"
-    image_path = IMAGES_DIR / f"{run_id}_confusion_matrix.png"
+    image_path = images_dir / f"{run_id}_confusion_matrix.png"
 
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     pd.DataFrame(matrix, index=target_names, columns=target_names).to_csv(matrix_path)
@@ -65,20 +79,44 @@ def evaluate_saved_model(
     categories: list[str],
     model_path: Path,
     output_dir: Path,
+    data_dir: Path,
+    images_dir: Path,
 ) -> dict[str, float | str]:
+    """Load a saved pipeline and evaluate it on the processed test set.
+
+    Args:
+        categories: Category names used to filter the test set.
+        model_path: Path to the saved sklearn pipeline (.pkl).
+        output_dir: Directory where evaluation artifacts are written.
+        data_dir: Path to the data directory containing processed CSVs.
+        images_dir: Directory where confusion matrix images are saved.
+
+    Returns:
+        A dict with keys: run_id, accuracy, macro_f1, weighted_f1,
+        report_path, confusion_matrix_path, confusion_matrix_image.
+
+    Raises:
+        FileNotFoundError: If model_path does not exist.
+    """
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    _, test_data = load_20newsgroups_data(categories=categories)
+    _, test_df = load_20newsgroups_processed(data_dir)
+    if categories:
+        test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
+    target_names = sorted(test_df["target_name"].unique().tolist())
+    label_to_idx = {name: i for i, name in enumerate(target_names)}
+
     pipeline = joblib.load(model_path)
-    predictions = pipeline.predict(test_data.data)
+    predictions = pipeline.predict(test_df["clean_text"])
 
     result = evaluate_predictions(
-        y_true=test_data.target,
+        y_true=test_df["target_name"].map(label_to_idx),
         y_pred=predictions,
-        target_names=test_data.target_names,
+        target_names=target_names,
         run_id="best_model_evaluation",
         output_dir=output_dir,
+        images_dir=images_dir,
     )
     print(pd.DataFrame([result]).to_string(index=False))
     return result

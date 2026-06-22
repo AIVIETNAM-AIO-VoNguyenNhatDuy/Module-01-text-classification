@@ -122,35 +122,90 @@ module-01-text-classification/
 
 ## Getting Started
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+### uv (recommended)
+
+[uv](https://docs.astral.sh/uv/) is a fast Python package and project manager. Install it once:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
+Then set up the project:
+
+```bash
+uv sync                  # create .venv and install all dependencies
+uv sync --group dev      # also install dev dependencies (jupyter, ruff)
+```
+
+Run any command inside the environment:
+
+```bash
+uv run python <script>
+uv run pytest
+uv run jupyter lab
+```
+
+### pip (alternative)
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+## Running Experiments
+
+Run a single experiment with the default config (`src/configs/experiment.yaml`):
+
+```bash
+PYTHONPATH=src uv run python src/scripts/experiment.py
+```
+
+Override model or stopword ratio from the CLI:
+
+```bash
+PYTHONPATH=src uv run python src/scripts/experiment.py model=logistic_regression stopword_ratio=0.5
+```
+
+Sweep all models and ratios in one command (15 runs total):
+
+```bash
+PYTHONPATH=src uv run python src/scripts/experiment.py --multirun \
+  model=naive_bayes,logistic_regression,random_forest \
+  stopword_ratio=0.0,0.2,0.5,0.8,1.0
+```
+
+View results in the MLflow UI:
+
+```bash
+uv run mlflow ui
+```
+
+Then open `http://localhost:5000` in your browser.
 
 ## Usage
 
 Train all configured TF-IDF experiments and save the best pipeline to `models/`:
 
-```powershell
+```bash
 python main.py --train
 ```
 
 Evaluate the saved model:
 
-```powershell
+```bash
 python main.py --evaluate
 ```
 
 Train then immediately evaluate:
 
-```powershell
+```bash
 python main.py --train --evaluate
 ```
 
 Run with explicit categories:
 
-```powershell
+```bash
 python main.py --train --evaluate --categories sci.space rec.sport.hockey comp.graphics talk.politics.misc
 ```
 
@@ -158,8 +213,8 @@ python main.py --train --evaluate --categories sci.space rec.sport.hockey comp.g
 
 Open notebooks inside the project environment:
 
-```powershell
-jupyter notebook
+```bash
+uv run jupyter lab
 ```
 
 Suggested ownership:
@@ -175,8 +230,8 @@ Suggested ownership:
 
 ## Testing
 
-```powershell
-python -m pytest
+```bash
+uv run pytest
 ```
 
 The tests use small synthetic inputs where possible. Running full training may require downloading the 20 Newsgroups dataset through scikit-learn.

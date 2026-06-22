@@ -6,7 +6,6 @@ import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from configs.config import MODEL_NAMES
 from data.preprocess import load_20newsgroups_data
 from evaluation.metrics import evaluate_predictions
 from features.build_features import build_vectorizer, stopwords_for_ratio
@@ -17,9 +16,29 @@ def train_pipeline(
     *,
     categories: list[str],
     stopword_ratios: list[float],
+    model_names: list[str],
     model_path: Path,
     output_dir: Path,
+    images_dir: Path,
 ) -> pd.DataFrame:
+    """Train all model/ratio combinations, save the best pipeline, and return metrics.
+
+    Iterates over every (stopword_ratio, model_name) pair, fits a TF-IDF +
+    classifier pipeline, evaluates on the test set, and persists the pipeline
+    with the highest weighted F1.
+
+    Args:
+        categories: 20 Newsgroups category names to load for train/test.
+        stopword_ratios: Fractions of stopwords to remove, e.g. [0.0, 0.5, 1.0].
+        model_names: Names of classifiers to benchmark.
+        model_path: Destination path to save the best fitted pipeline.
+        output_dir: Directory where per-run reports and confusion matrices are written.
+        images_dir: Directory where confusion matrix images are saved.
+
+    Returns:
+        A DataFrame with one row per (ratio, model) run containing run_id,
+        accuracy, macro_f1, weighted_f1, vectorizer, model, and stopword_ratio.
+    """
     train_data, test_data = load_20newsgroups_data(categories=categories)
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -29,7 +48,7 @@ def train_pipeline(
     best_weighted_f1 = -1.0
 
     for ratio in stopword_ratios:
-        for model_name in MODEL_NAMES:
+        for model_name in model_names:
             run_id = f"tfidf_{model_name}_stopwords_{ratio:.1f}"
             pipeline = Pipeline(
                 steps=[
@@ -46,6 +65,7 @@ def train_pipeline(
                 target_names=test_data.target_names,
                 run_id=run_id,
                 output_dir=output_dir,
+                images_dir=images_dir,
             )
             result.update(
                 {
