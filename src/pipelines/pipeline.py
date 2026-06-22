@@ -18,6 +18,7 @@ def train_pipeline(
     categories: list[str],
     stopword_ratios: list[float],
     model_names: list[str],
+    data_dir: Path,
     model_path: Path,
     output_dir: Path,
     images_dir: Path,
@@ -32,6 +33,7 @@ def train_pipeline(
         categories: 20 Newsgroups category names to load for train/test.
         stopword_ratios: Fractions of stopwords to remove, e.g. [0.0, 0.5, 1.0].
         model_names: Names of classifiers to benchmark.
+        data_dir: Directory containing the processed dataset.
         model_path: Destination path to save the best fitted pipeline.
         output_dir: Directory where per-run reports and confusion matrices are written.
         images_dir: Directory where confusion matrix images are saved.
@@ -41,7 +43,7 @@ def train_pipeline(
         accuracy, macro_f1, weighted_f1, vectorizer, model, stopword_ratio,
         cv_best_score, and best_params.
     """
-    train_df, test_df = load_20newsgroups_processed(Path("data"))
+    train_df, test_df = load_20newsgroups_processed(data_dir)
     train_df = train_df[train_df["target_name"].isin(categories)].reset_index(drop=True)
     test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
     target_names = train_df.sort_values("target")["target_name"].drop_duplicates().tolist()
