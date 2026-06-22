@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import joblib
@@ -37,7 +38,8 @@ def train_pipeline(
 
     Returns:
         A DataFrame with one row per (ratio, model) run containing run_id,
-        accuracy, macro_f1, weighted_f1, vectorizer, model, and stopword_ratio.
+        accuracy, macro_f1, weighted_f1, vectorizer, model, stopword_ratio,
+        cv_best_score, and best_params.
     """
     train_df, test_df = load_20newsgroups_processed(Path("data"))
     train_df = train_df[train_df["target_name"].isin(categories)].reset_index(drop=True)
@@ -61,6 +63,7 @@ def train_pipeline(
                 ]
             )
             pipeline.fit(train_df["clean_text"], train_df["target"])
+            model_step = pipeline.named_steps["model"]
             predictions = pipeline.predict(test_df["clean_text"])
 
             result = evaluate_predictions(
@@ -76,6 +79,8 @@ def train_pipeline(
                     "vectorizer": "tfidf",
                     "model": model_name,
                     "stopword_ratio": ratio,
+                    "cv_best_score": float(model_step.best_score_),
+                    "best_params": json.dumps(model_step.best_params_, sort_keys=True),
                 }
             )
             rows.append(result)
