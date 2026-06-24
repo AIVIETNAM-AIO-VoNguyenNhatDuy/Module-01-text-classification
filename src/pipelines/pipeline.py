@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from data.preprocess import load_20newsgroups_data
+from data.preprocess import load_20newsgroups_processed
 from evaluation.metrics import evaluate_predictions
 from features.build_features import build_vectorizer, stopwords_for_ratio
 from models.model import build_model
@@ -17,6 +18,7 @@ def train_pipeline(
     categories: list[str],
     stopword_ratios: list[float],
     model_names: list[str],
+    data_dir: Path,
     model_path: Path,
     output_dir: Path,
     images_dir: Path,
@@ -31,15 +33,21 @@ def train_pipeline(
         categories: 20 Newsgroups category names to load for train/test.
         stopword_ratios: Fractions of stopwords to remove, e.g. [0.0, 0.5, 1.0].
         model_names: Names of classifiers to benchmark.
+        data_dir: Directory containing the processed dataset.
         model_path: Destination path to save the best fitted pipeline.
         output_dir: Directory where per-run reports and confusion matrices are written.
         images_dir: Directory where confusion matrix images are saved.
 
     Returns:
         A DataFrame with one row per (ratio, model) run containing run_id,
-        accuracy, macro_f1, weighted_f1, vectorizer, model, and stopword_ratio.
+        accuracy, macro_f1, weighted_f1, vectorizer, model, stopword_ratio,
+        cv_best_score, and best_params.
     """
-    train_data, test_data = load_20newsgroups_data(categories=categories)
+    train_df, test_df = load_20newsgroups_processed(data_dir)
+    train_df = train_df[train_df["target_name"].isin(categories)].reset_index(drop=True)
+    test_df = test_df[test_df["target_name"].isin(categories)].reset_index(drop=True)
+    target_names = train_df.sort_values("target")["target_name"].drop_duplicates().tolist()
+
     output_dir.mkdir(parents=True, exist_ok=True)
     model_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -53,16 +61,17 @@ def train_pipeline(
             pipeline = Pipeline(
                 steps=[
                     ("vectorizer", build_vectorizer("tfidf", stopwords_for_ratio(ratio))),
-                    ("model", build_model(model_name)),
+                    ("model", build_model(model_name, n_jobs=1)),
                 ]
             )
-            pipeline.fit(train_data.data, train_data.target)
-            predictions = pipeline.predict(test_data.data)
+            pipeline.fit(train_df["clean_text"], train_df["target"])
+            model_step = pipeline.named_steps["model"]
+            predictions = pipeline.predict(test_df["clean_text"])
 
             result = evaluate_predictions(
-                y_true=test_data.target,
+                y_true=test_df["target"],
                 y_pred=predictions,
-                target_names=test_data.target_names,
+                target_names=target_names,
                 run_id=run_id,
                 output_dir=output_dir,
                 images_dir=images_dir,
@@ -72,6 +81,8 @@ def train_pipeline(
                     "vectorizer": "tfidf",
                     "model": model_name,
                     "stopword_ratio": ratio,
+                    "cv_best_score": float(model_step.best_score_),
+                    "best_params": json.dumps(model_step.best_params_, sort_keys=True),
                 }
             )
             rows.append(result)

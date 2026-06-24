@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import joblib
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -61,7 +62,7 @@ def evaluate_predictions(
     axes = display.plot(xticks_rotation=45).ax_
     axes.figure.tight_layout()
     axes.figure.savefig(image_path, dpi=160)
-    axes.figure.clf()
+    plt.close(axes.figure)
 
     return {
         "run_id": run_id,

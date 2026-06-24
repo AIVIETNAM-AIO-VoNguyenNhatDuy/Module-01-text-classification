@@ -1,0 +1,39 @@
+{
+  "comp.graphics": {
+    "precision": 0.9422572178477691,
+    "recall": 0.9373368146214099,
+    "f1-score": 0.9397905759162304,
+    "support": 383.0
+  },
+  "rec.sport.hockey": {
+    "precision": 0.9661458333333334,
+    "recall": 0.958656330749354,
+    "f1-score": 0.9623865110246433,
+    "support": 387.0
+  },
+  "sci.space": {
+    "precision": 0.8796791443850267,
+    "recall": 0.875,
+    "f1-score": 0.8773333333333333,
+    "support": 376.0
+  },
+  "talk.politics.misc": {
+    "precision": 0.8538961038961039,
+    "recall": 0.8737541528239202,
+    "f1-score": 0.8637110016420362,
+    "support": 301.0
+  },
+  "accuracy": 0.9136143745680718,
+  "macro avg": {
+    "precision": 0.9104945748655582,
+    "recall": 0.9111868245486711,
+    "f1-score": 0.9108053554790607,
+    "support": 1447.0
+  },
+  "weighted avg": {
+    "precision": 0.9140048635087719,
+    "recall": 0.9136143745680718,
+    "f1-score": 0.9137786559571799,
+    "support": 1447.0
+  }
+}
