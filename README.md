@@ -350,27 +350,3 @@ after cloning.
 | Huỳnh Ngọc Minh | AI Engineer (Data) |
 | Trần Hải Đăng | AI Engineer (Model) |
 
-## Notes for Maintaining the Repository
-
-If the team decides to remove the `docs/` folder, delete it from git and update
-the repository with a normal commit:
-
-```bash
-git rm -r docs
-git status
-git add README.md
-git commit -m "Update README and remove docs folder"
-git push origin main
-```
-
-If `docs/` contains local changes that are not tracked by git, use this instead:
-
-```bash
-Remove-Item -Recurse -Force docs
-git add -A
-git commit -m "Update README and remove docs folder"
-git push origin main
-```
-
-Use the first command sequence when `docs/` is already tracked by git. Use the
-second only when PowerShell says `git rm -r docs` cannot match tracked files.
