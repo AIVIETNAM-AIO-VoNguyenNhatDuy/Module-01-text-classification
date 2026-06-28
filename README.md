@@ -1,79 +1,163 @@
-# Module 01 Project - Impact of Stopword Removal on Text Classification
+# Impact of Stopword Removal on Text Classification
 
-Research project for the Module 1 text classification topic.
+This repository contains a research project on how stopword removal affects text
+classification performance. The project uses the 20 Newsgroups dataset, TF-IDF
+features, and classical machine learning models.
 
-This project studies the impact of stopword removal on text classification performance using the 20 Newsgroups dataset. The team benchmarks classical machine learning models under multiple stopword settings and compares overall metrics, per-class changes, and error cases.
+The main goal is not only to find the best model, but also to understand whether
+removing stopwords helps, how much it helps, and whether the effect is consistent
+across models and classes.
 
 ## Research Questions
 
 - Does stopword removal improve text classification performance?
-- How does stopword removal affect accuracy and F1-score?
-- Which model is most stable when stopwords are removed?
-- Does stopword removal help all classes equally, or help some classes while hurting others?
-- What happens when removing stopwords at different levels: `0%`, `20%`, `50%`, `80%`, and `100%`?
-
-## Results at a Glance
-
-Fill this section after experiments are completed.
-
-| Model | Stopword Ratio | Accuracy | Macro F1 | Weighted F1 |
-| --- | ---: | ---: | ---: | ---: |
-| Naive Bayes | TBD | TBD | TBD | TBD |
-| Logistic Regression | TBD | TBD | TBD | TBD |
-| Random Forest | TBD | TBD | TBD | TBD |
-
-## Evaluation Charts
-
-Generated charts should be saved in `images/`.
-
-- Confusion matrix
-- Per-class F1 comparison
-- Stopword ratio vs F1-score
+- Which stopword removal ratio works best: `0.0`, `0.2`, `0.5`, `0.8`, or `1.0`?
+- Which model works best with TF-IDF features?
+- Does stopword removal help all classes equally?
+- Can aggressive stopword removal hurt performance?
 
 ## Dataset
 
-Primary dataset: `sklearn.datasets.fetch_20newsgroups`.
+The project uses `sklearn.datasets.fetch_20newsgroups` with the official
+train/test split. Headers, footers, and quoted replies are removed when loading
+the raw data to reduce metadata leakage.
 
-Recommended subset for faster iteration:
+Current category subset:
 
-- `sci.space`
-- `rec.sport.hockey`
 - `comp.graphics`
+- `rec.sport.hockey`
+- `sci.space`
 - `talk.politics.misc`
-- 
+
+Processed data is stored in:
+
+```text
+data/processed/20newsgroups_train.csv
+data/processed/20newsgroups_test.csv
+```
+
+Current processed dataset size:
+
+| Split | Documents |
+| --- | ---: |
+| Train | 2,160 |
+| Test | 1,447 |
+
 ## Methodology
 
 ```text
-20 Newsgroups Dataset
+20 Newsgroups
   |
   v
 Remove headers, footers, and quotes
   |
   v
-Basic text preprocessing
-  |- lowercase
-  |- remove punctuation
-  |- remove special characters
-  |- optionally remove numbers
+Text preprocessing
+  |- remove email-like patterns
+  |- remove simple signature lines
+  |- lowercase text
+  |- keep alphabetic characters and whitespace
+  |- normalize whitespace
+  |- drop empty and very short documents
   |
   v
-Create experiment branches
-  |- Baseline A: TF-IDF without stopword removal
-  |- Baseline B: TF-IDF with stopword removal
-  |- Optional: CountVectorizer comparison
+Stopword removal ratio
+  |- 0.0, 0.2, 0.5, 0.8, 1.0
   |
   v
-Train models
-  |- Naive Bayes
+TF-IDF vectorization
+  |- min_df=2
+  |
+  v
+Model training and tuning
+  |- Multinomial Naive Bayes
   |- Logistic Regression
   |- Random Forest
   |
   v
-Evaluate
+Evaluation
   |- Accuracy
-  |- Precision / Recall / F1-score
+  |- Macro F1
+  |- Weighted F1
+  |- Per-class report
   |- Confusion matrix
-  |- Per-class performance deltas
+```
+
+## Experiment Setup
+
+Experiment configuration is stored in:
+
+```text
+src/configs/experiment.yaml
+```
+
+Default settings:
+
+| Setting | Value |
+| --- | --- |
+| Vectorizer | TF-IDF |
+| Stopword ratios | `0.0`, `0.2`, `0.5`, `0.8`, `1.0` |
+| Models | `naive_bayes`, `logistic_regression`, `random_forest` |
+| Model selection | `GridSearchCV` |
+| CV splitter | 3-fold shuffled `StratifiedKFold` |
+| CV scoring | `f1_macro` |
+| Random state | `42` |
+
+Model search spaces:
+
+| Model | Hyperparameters |
+| --- | --- |
+| Naive Bayes | `alpha`: `0.1`, `0.5`, `1.0` |
+| Logistic Regression | `C`: `0.1`, `1.0`, `10.0`; `class_weight`: `None`, `balanced` |
+| Random Forest | `max_depth`: `None`, `30`; `min_samples_leaf`: `1`, `2` |
+
+## Results
+
+Main metrics are saved in:
+
+```text
+reports/results/metrics.csv
+```
+
+Best run from the current experiment:
+
+| Model | Stopword Ratio | Accuracy | Macro F1 | Weighted F1 | Best Params |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Naive Bayes | `0.5` | `0.9143` | `0.9117` | `0.9144` | `alpha=0.1` |
+
+Best result per model:
+
+| Model | Best Ratio | Accuracy | Macro F1 | Weighted F1 |
+| --- | ---: | ---: | ---: | ---: |
+| Naive Bayes | `0.5` | `0.9143` | `0.9117` | `0.9144` |
+| Logistic Regression | `1.0` | `0.8922` | `0.8904` | `0.8927` |
+| Random Forest | `0.8` | `0.8535` | `0.8521` | `0.8550` |
+
+Macro F1 by stopword ratio:
+
+| Model | 0.0 | 0.2 | 0.5 | 0.8 | 1.0 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Naive Bayes | `0.9108` | `0.9110` | `0.9117` | `0.9110` | `0.9090` |
+| Logistic Regression | `0.8775` | `0.8824` | `0.8811` | `0.8843` | `0.8904` |
+| Random Forest | `0.8372` | `0.8458` | `0.8497` | `0.8521` | `0.8493` |
+
+Key observations:
+
+- Stopword removal helps, but the improvement is model-dependent.
+- Naive Bayes is the best overall model in the current setup.
+- Naive Bayes is already strong without stopword removal; ratio `0.5` gives the
+  best score, but the gain over ratio `0.0` is small.
+- Logistic Regression improves as more stopwords are removed, with its best
+  result at ratio `1.0`.
+- Random Forest improves up to ratio `0.8`, but it remains weaker than the other
+  two models on sparse TF-IDF features.
+- Full stopword removal is not automatically the best choice. It slightly hurts
+  Naive Bayes compared with partial removal.
+
+Confusion matrix images are generated in:
+
+```text
+images/
 ```
 
 ## Project Structure
@@ -82,92 +166,110 @@ Evaluate
 module-01-text-classification/
 |-- data/
 |   |-- raw/                         # Local raw data, ignored by git
-|   |-- interim/                     # Temporary processed files
-|   `-- processed/                   # Final processed files
-|-- docs/
-|   |-- project-brief.md
-|   |-- experiment-plan.md
-|   |-- references.md
-|   `-- team-workflow.md
-|-- images/
-|   `-- .gitkeep                     # Generated charts go here
-|-- models/
-|   `-- .gitkeep                     # Saved model files go here
+|   |-- interim/                     # Temporary intermediate files
+|   `-- processed/                   # Processed train/test CSV files
+|-- images/                          # Generated confusion matrix images
+|-- models/                          # Saved model artifacts
 |-- notebooks/
 |   |-- eda.ipynb
 |   |-- preprocessing.ipynb
-|   |-- baseline_a_no_stopwords.ipynb
-|   |-- baseline_b_stopwords.ipynb
+|   |-- baseline_no_stopwords.ipynb
+|   |-- baseline_stopwords.ipynb
 |   |-- model_machine_learning.ipynb
 |   `-- analysis.ipynb
 |-- reports/
 |   |-- figures/
-|   `-- results/
+|   `-- results/                     # Metrics, reports, confusion matrices
 |-- src/
-|   |-- configs/config.py            # Paths, categories, model names
-|   |-- data/preprocess.py           # Load and clean text data
-|   |-- features/build_features.py   # Vectorizers and stopword ratios
-|   |-- models/model.py              # Model factory
-|   |-- pipelines/pipeline.py        # Training loop
-|   `-- evaluation/metrics.py        # Reports and confusion matrices
+|   |-- configs/experiment.yaml      # Hydra experiment configuration
+|   |-- data/preprocess.py           # Data loading and text cleaning
+|   |-- data/eda.py                  # EDA helper functions
+|   |-- features/build_features.py   # TF-IDF/Count vectorizers and stopword ratios
+|   |-- models/model.py              # Model factory and GridSearchCV setup
+|   |-- pipelines/pipeline.py        # Full training loop
+|   |-- scripts/experiment.py        # Single-run Hydra + MLflow experiment script
+|   `-- evaluation/metrics.py        # Metrics and confusion matrix outputs
 |-- tests/
 |   |-- conftest.py
 |   |-- test_preprocess.py
 |   |-- test_build_features.py
 |   `-- test_metrics.py
-|-- main.py                          # CLI entry point
+|-- main.py
 |-- pyproject.toml
-`-- requirements.txt
+|-- requirements.txt
+`-- README.md
 ```
 
-## Getting Started
+## Installation
 
-### uv (recommended)
+### Option 1: `uv` (recommended)
 
-[uv](https://docs.astral.sh/uv/) is a fast Python package and project manager. Install it once:
+Install dependencies:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
 ```
 
-Then set up the project:
+Install development dependencies as well:
 
 ```bash
-uv sync                  # create .venv and install all dependencies
-uv sync --group dev      # also install dev dependencies (jupyter, ruff)
+uv sync --group dev
 ```
 
-Run any command inside the environment:
+### Option 2: `pip`
 
-```bash
-uv run python <script>
-uv run pytest
-uv run jupyter lab
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 ```
 
-### pip (alternative)
+macOS/Linux:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate        # Windows: .\.venv\Scripts\Activate.ps1
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ## Running Experiments
 
-Run a single experiment with the default config (`src/configs/experiment.yaml`):
+### Run the main training pipeline
+
+The intended main entry point is `main.py` with Hydra config values.
 
 ```bash
-PYTHONPATH=src uv run python src/scripts/experiment.py
+PYTHONPATH=src uv run python main.py mode=train
 ```
 
-Override model or stopword ratio from the CLI:
+Evaluate a saved best model:
 
 ```bash
-PYTHONPATH=src uv run python src/scripts/experiment.py model=logistic_regression stopword_ratio=0.5
+PYTHONPATH=src uv run python main.py mode=evaluate
 ```
 
-Sweep all models and ratios in one command (15 runs total):
+Train and evaluate:
+
+```bash
+PYTHONPATH=src uv run python main.py mode=all
+```
+
+On Windows PowerShell, use:
+
+```powershell
+$env:PYTHONPATH = "src"
+uv run python main.py mode=train
+```
+
+### Run one Hydra experiment with MLflow logging
+
+```bash
+PYTHONPATH=src uv run python src/scripts/experiment.py model=naive_bayes stopword_ratio=0.5
+```
+
+Run all model/ratio combinations with Hydra multirun:
 
 ```bash
 PYTHONPATH=src uv run python src/scripts/experiment.py --multirun \
@@ -175,73 +277,100 @@ PYTHONPATH=src uv run python src/scripts/experiment.py --multirun \
   stopword_ratio=0.0,0.2,0.5,0.8,1.0
 ```
 
-View results in the MLflow UI:
+Open MLflow UI:
 
 ```bash
 uv run mlflow ui
 ```
 
-Then open `http://localhost:5000` in your browser.
+Then open:
 
-## Usage
-
-Train all configured TF-IDF experiments and save the best pipeline to `models/`:
-
-```bash
-python main.py --train
-```
-
-Evaluate the saved model:
-
-```bash
-python main.py --evaluate
-```
-
-Train then immediately evaluate:
-
-```bash
-python main.py --train --evaluate
-```
-
-Run with explicit categories:
-
-```bash
-python main.py --train --evaluate --categories sci.space rec.sport.hockey comp.graphics talk.politics.misc
+```text
+http://localhost:5000
 ```
 
 ## Notebooks
 
-Open notebooks inside the project environment:
+Open notebooks with:
 
 ```bash
 uv run jupyter lab
 ```
 
-Suggested ownership:
+Notebook roles:
 
-| Notebook | Owner |
+| Notebook | Purpose |
 | --- | --- |
-| `eda.ipynb` | Data / EDA |
-| `preprocessing.ipynb` | Data preprocessing |
-| `baseline_a_no_stopwords.ipynb` | Baseline A |
-| `baseline_b_stopwords.ipynb` | Baseline B |
-| `model_machine_learning.ipynb` | Model comparison |
-| `analysis.ipynb` | Final analysis |
+| `eda.ipynb` | Explore class distribution, document length, and top words |
+| `preprocessing.ipynb` | Build and validate processed train/test CSV files |
+| `baseline_no_stopwords.ipynb` | Baseline experiments without stopword removal |
+| `baseline_stopwords.ipynb` | Stopword-ratio baseline experiments |
+| `model_machine_learning.ipynb` | Model comparison and experiment runs |
+| `analysis.ipynb` | Final result analysis and interpretation |
 
 ## Testing
+
+Run tests:
 
 ```bash
 uv run pytest
 ```
 
-The tests use small synthetic inputs where possible. Running full training may require downloading the 20 Newsgroups dataset through scikit-learn.
+or:
+
+```bash
+pytest
+```
+
+The tests focus on small utility functions and do not require running the full
+training pipeline.
+
+## Generated Artifacts
+
+Generated outputs are intentionally ignored by git:
+
+- `reports/results/*`
+- `reports/figures/*`
+- `images/*`
+- `models/*`
+- `mlruns/`
+- `mlartifacts/`
+- `outputs/`
+- `multirun/`
+
+The repository keeps `.gitkeep` files so the expected directories still exist
+after cloning.
 
 ## Team
 
 | Name | Role |
 | --- | --- |
-| TBD | Team Leader & QA |
-| TBD | EDA & Preprocessing |
-| TBD | Baseline A |
-| TBD | Baseline B |
-| TBD | Analysis & Report |
+| Võ Nguyễn Nhật Duy | Team Leader |
+| Trần Sơn Phát | AI Engineer (Pipeline) |
+| Huỳnh Ngọc Minh | AI Engineer (Data) |
+| Trần Hải Đăng | AI Engineer (Model) |
+
+## Notes for Maintaining the Repository
+
+If the team decides to remove the `docs/` folder, delete it from git and update
+the repository with a normal commit:
+
+```bash
+git rm -r docs
+git status
+git add README.md
+git commit -m "Update README and remove docs folder"
+git push origin main
+```
+
+If `docs/` contains local changes that are not tracked by git, use this instead:
+
+```bash
+Remove-Item -Recurse -Force docs
+git add -A
+git commit -m "Update README and remove docs folder"
+git push origin main
+```
+
+Use the first command sequence when `docs/` is already tracked by git. Use the
+second only when PowerShell says `git rm -r docs` cannot match tracked files.
