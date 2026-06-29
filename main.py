@@ -28,6 +28,7 @@ def main(cfg: DictConfig) -> None:
             categories=categories,
             stopword_ratios=stopword_ratios,
             model_names=model_names,
+            data_dir=data_dir,
             model_path=model_path,
             output_dir=output_dir,
             images_dir=images_dir,
