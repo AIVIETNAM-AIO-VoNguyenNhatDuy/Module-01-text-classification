@@ -7,10 +7,10 @@ import joblib
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from data.preprocess import load_20newsgroups_processed
-from evaluation.metrics import evaluate_predictions
-from features.build_features import build_vectorizer, stopwords_for_ratio
-from models.model import build_model
+from src.data.preprocess import load_20newsgroups_processed
+from src.evaluation.metrics import evaluate_predictions
+from src.features.build_features import build_vectorizer, stopwords_for_ratio
+from src.models.model import build_model
 
 
 def train_pipeline(

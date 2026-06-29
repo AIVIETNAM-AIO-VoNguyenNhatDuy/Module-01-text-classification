@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from evaluation.metrics import evaluate_predictions
+from src.evaluation.metrics import evaluate_predictions
 
 
 def test_evaluate_predictions_writes_outputs(tmp_path: Path) -> None:

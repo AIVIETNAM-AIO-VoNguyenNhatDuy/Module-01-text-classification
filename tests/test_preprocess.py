@@ -1,4 +1,4 @@
-from data.preprocess import clean_text
+from src.data.preprocess import clean_text
 
 
 def test_clean_text_lowercases_and_removes_punctuation() -> None:
