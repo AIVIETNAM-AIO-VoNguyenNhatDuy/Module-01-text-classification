@@ -5,8 +5,8 @@ from pathlib import Path
 import hydra
 from omegaconf import DictConfig
 
-from evaluation.metrics import evaluate_saved_model
-from pipelines.pipeline import train_pipeline
+from src.evaluation.metrics import evaluate_saved_model
+from src.pipelines.pipeline import train_pipeline
 
 
 @hydra.main(version_base=None, config_path="src/configs", config_name="experiment")
@@ -28,6 +28,7 @@ def main(cfg: DictConfig) -> None:
             categories=categories,
             stopword_ratios=stopword_ratios,
             model_names=model_names,
+            data_dir=data_dir,
             model_path=model_path,
             output_dir=output_dir,
             images_dir=images_dir,

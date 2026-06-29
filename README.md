@@ -241,38 +241,31 @@ pip install -r requirements.txt
 The intended main entry point is `main.py` with Hydra config values.
 
 ```bash
-PYTHONPATH=src uv run python main.py mode=train
+uv run python main.py mode=train
 ```
 
 Evaluate a saved best model:
 
 ```bash
-PYTHONPATH=src uv run python main.py mode=evaluate
+uv run python main.py mode=evaluate
 ```
 
 Train and evaluate:
 
 ```bash
-PYTHONPATH=src uv run python main.py mode=all
-```
-
-On Windows PowerShell, use:
-
-```powershell
-$env:PYTHONPATH = "src"
-uv run python main.py mode=train
+uv run python main.py mode=all
 ```
 
 ### Run one Hydra experiment with MLflow logging
 
 ```bash
-PYTHONPATH=src uv run python src/scripts/experiment.py model=naive_bayes stopword_ratio=0.5
+uv run python src/scripts/experiment.py model=naive_bayes stopword_ratio=0.5
 ```
 
 Run all model/ratio combinations with Hydra multirun:
 
 ```bash
-PYTHONPATH=src uv run python src/scripts/experiment.py --multirun \
+uv run python src/scripts/experiment.py --multirun \
   model=naive_bayes,logistic_regression,random_forest \
   stopword_ratio=0.0,0.2,0.5,0.8,1.0
 ```

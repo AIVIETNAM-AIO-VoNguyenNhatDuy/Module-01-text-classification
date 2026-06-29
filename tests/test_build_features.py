@@ -1,4 +1,4 @@
-from features.build_features import build_vectorizer, stopwords_for_ratio
+from src.features.build_features import build_vectorizer, stopwords_for_ratio
 
 
 def test_stopword_ratio_zero_keeps_stopwords() -> None:

@@ -13,7 +13,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from data.preprocess import load_20newsgroups_processed
+from src.data.preprocess import load_20newsgroups_processed
 
 
 def evaluate_predictions(
